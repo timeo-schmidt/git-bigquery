@@ -1,6 +1,6 @@
 /*TEST COMMAND :
 
-node get_git_files.js -b master -p ../test-repo/
+node get_git_files.js -b master -p ../sql-api/
 
 */
 
@@ -10,10 +10,16 @@ const path = require('path');
 const commandLineArgs = require('command-line-args');
 const util = require('util');
 
+var os = require('os');
 var fs = require('fs');
 
 var globalCommits = [];
-var globalContents = [];
+var globalContents = {};
+var globalFiles = [];
+
+
+
+var commitID;
 
 
 //Passed Arguments via commandLineArgs
@@ -68,63 +74,92 @@ Git.Repository.open(pathToRepo).then(function(repo) {
       //Commit Walker ToDo when walking over Commit in history
       //COMMIT LEVEL
       commitHistoryEmitter.on('commit', function(commit) {
-        var commitObject;
 
-        console.log("[Good] Walking Over Commit");
+        var diffArray = [];
 
-        var commitID = String(commit.id());
-        var commitTree = String(commit.treeId());
-        var commitParent = commit.parents();
-        var commitAuthor_name = commit.author().name();
-        var commitAuthor_email = commit.author().email();
-        var commitAuthor_time_sec = commit.author().when().time();
+        console.log("DiffStuff");
+        commit.getDiff().then(function(arrayDiff) {
+          arrayDiff.forEach(function(diff) {
+            diff.patches().then(function(arrayConvenientPatch) {
+              arrayConvenientPatch.forEach(function(patch) {
+                patch.hunks().then(function(arrayConvenientHunk) {
+                  arrayConvenientHunk.forEach(function(hunk) {
+                    hunk.lines().then(function(lines) {
 
-        var commitCommitter_name = commit.committer().name();
-        var commitCommitter_email = commit.committer().email();
-        var commitCommitter_time_sec = commit.committer().when().time();
-
-        var commitMessage = commit.message();
-        var commitRepoName = repoName;
-
-        console.log("test1");
-        // console.log(commitID);
-        // console.log(commitTree);
-        // console.log(commitParent);
-        // console.log(commitAuthor_name);
-        // console.log(commitAuthor_email);
-        // console.log(commitAuthor_time_sec);
-        // console.log(commitCommitter_name);
-        // console.log(commitCommitter_email);
-        // console.log(commitCommitter_time_sec);
-        // console.log(commitMessage);
+                      var diff_contents_string = "";
+                      lines.forEach(function(line) {
+                        diff_contents_string += String.fromCharCode(line.origin()) +
+                          line.content().trim() + "\n";
+                      });
 
 
-        console.log("commitID:");
-        console.log(commit.id());
-        console.log(commitParent.length);
+                      var pushDiff = {
+                        old_path: patch.oldFile().path(),
+                        new_path: patch.newFile().path(),
+                        old_sha1: String(patch.oldFile().id()),
+                        new_sha1: String(patch.newFile().id()),
+                        diff_contents: diff_contents_string
+                      };
+
+                      diffArray.push(pushDiff);
 
 
+                    });
+                  });
+                });
+              });
+            });
+          });
+          //Retrieved Diffs...Diffs stored into Array...Diff Array is now storded into current Commit Object
 
-        commitOject = {
-          "commit": commitID,
-          "tree": commitTree,
-          "parent": commitParent,
-          "author": {
-            "name": commitAuthor_name,
-            "email": commitAuthor_email,
-            "time_sec": commitAuthor_time_sec
-          },
-          "committer": {
-            "name": commitCommitter_name,
-            "email": commitCommitter_email,
-            "time_sec": commitCommitter_time_sec
-          },
-          "message": commitMessage,
-          "repo_name": repoName
-        };
+          var commitObject;
 
-        globalCommits.push(commitOject);
+          console.log("[Good] Walking Over Commit");
 
+          commitID = String(commit.id());
+
+
+          commitParentShas = [];
+          var commitParent = commit.parents();
+          commitParent.forEach(function(element) {
+            commitParentShas.push(String(element));
+          });
+
+
+          var commitAuthor_name = commit.author().name();
+          var commitAuthor_email = commit.author().email();
+          var commitAuthor_time_sec = commit.author().when().time();
+
+          var commitCommitter_name = commit.committer().name();
+          var commitCommitter_email = commit.committer().email();
+          var commitCommitter_time_sec = commit.committer().when().time();
+
+          var commitMessage = commit.message();
+          var commitRepoName = repoName;
+
+          commitObject = {
+            "commit": commitID,
+            "parents": commitParentShas,
+            "author": {
+              "name": commitAuthor_name,
+              "email": commitAuthor_email,
+              "time_sec": commitAuthor_time_sec
+            },
+            "committer": {
+              "name": commitCommitter_name,
+              "email": commitCommitter_email,
+              "time_sec": commitCommitter_time_sec
+            },
+            "message": commitMessage,
+            "repo_name": repoName,
+            "difference": diffArray
+          };
+
+          console.log(JSON.stringify(diffArray));
+
+          globalCommits.push(commitObject);
+
+        });
 
 
 
@@ -134,6 +169,8 @@ Git.Repository.open(pathToRepo).then(function(repo) {
           var treeEmitter = tree.walk(false);
           treeEmitter.on('entry', function(treeEntry) {
             var contentObject = {};
+            var fileObject = {};
+
 
             // console.log("[Good] Walking Over Tree");
 
@@ -152,8 +189,9 @@ Git.Repository.open(pathToRepo).then(function(repo) {
                 var contentID = String(treeEntry.oid());
                 var contentSize = blob.rawsize();
                 var contentString = blob.toString();
-                var contentIsBinary = blob.isBinary();
+                // var contentIsBinary = blob.isBinary();
                 var contentRepoName = repoName;
+                var contentPath = String(treeEntry.path());
 
                 // console.log(contentID);
                 // console.log(contentSize);
@@ -161,25 +199,39 @@ Git.Repository.open(pathToRepo).then(function(repo) {
                 // console.log(contentIsBinary);
                 // console.log(contentRepoName);
 
+                var notUndefined = function(param) {
+                  if (param == undefined || param == "undefined") {
+                    return null;
+                  } else {
+                    return param;
+                  }
+                }
 
-                contentOject["contentID"] = contentID;
-                contentOject["contentSize"] = contentSize;
-                contentOject["contentString"] = contentString;
-                contentOject["contentIsBinary"] = contentIsBinary;
-                contentOject["contentRepoName"] = contentRepoName;
-
-                var person = {
-                  firstName: "John",
-                  lastName: "Doe",
-                  age: 50,
-                  eyeColor: "blue"
-                };
-
-
-                console.log("globalContentsLength" + String(contentObject["contentID"]));
+                contentObject["id"] = notUndefined(contentID);
+                contentObject["size"] = contentSize;
+                contentObject["content"] = contentString;
+                // contentObject["contentIsBinary"] = contentIsBinary;
+                contentObject["repo_name"] = contentRepoName;
+                contentObject["path"] = contentPath;
 
 
-                globalContents.push(contentOject);
+                //Build File Object
+                fileObject = {
+                  "repo_name": contentRepoName,
+                  "ref": notUndefined(String(commitID)),
+                  "path": contentPath,
+                  "id": contentID
+                }
+
+
+
+                // console.log("globalContentsLength" + String(JSON.stringify(contentObject)));
+
+
+                globalContents[contentObject.id] = contentObject;
+                globalFiles.push(fileObject);
+
+
 
                 // console.log("global Contents" + JSON.stringify(globalContents));
 
@@ -207,23 +259,50 @@ Git.Repository.open(pathToRepo).then(function(repo) {
 
       commitHistoryEmitter.on('end', function(error) {
 
-        fs.writeFile("../commits", JSON.stringify(globalCommits), function(err) {
-          if (err) {
-            return console.log(err);
-          }
 
-          console.log("Commits Written!");
+        //UNCOMMENT IF ACTUAL JSON FILES ARE WANTED
+        // fs.writeFile("../GitParsedContent/commits.json", JSON.stringify(globalCommits), function(err) {
+        //   if (err) {
+        //     return console.log(err);
+        //   }
+        //
+        //   console.log("Commits Written!");
+        //
+        //   // console.log(JSON.stringify(globalContents));
+        //   fs.writeFile("../GitParsedContent/contents.json", JSON.stringify(globalContents), function(err) {
+        //     if (err) {
+        //       return console.log(err);
+        //     }
+        //
+        //     console.log("Contents Written!");
+        //   });
+        //
+        //   //Write global Files
+        //   fs.writeFile("../GitParsedContent/files.json", JSON.stringify(globalFiles), function(err) {
+        //     if (err) {
+        //       return console.log(err);
+        //     }
+        //
+        //     console.log("Files Written!");
+        //   });
+        //
+        // });
 
-          console.log(JSON.stringify(globalContents))
-          fs.writeFile("../contents", JSON.stringify(globalContents), function(err) {
-            if (err) {
-              return console.log(err);
-            }
-
-            console.log("Contents Written!");
-          });
-
+        fs.writeFileSync('../GitParsedContent/commits_bigquery-format.json', '');
+        globalCommits.forEach(function(value, i) {
+          fs.appendFileSync('../GitParsedContent/commits_bigquery-format.json', JSON.stringify(value) + os.EOL);
         });
+
+        fs.writeFileSync('../GitParsedContent/files_bigquery-format.json', '');
+        globalFiles.forEach(function(value, i) {
+          fs.appendFileSync('../GitParsedContent/files_bigquery-format.json', JSON.stringify(value) + os.EOL);
+        });
+
+        fs.writeFileSync('../GitParsedContent/contents_bigquery-format.json', '');
+        Object.keys(globalContents).forEach(function(key, i) {
+          fs.appendFileSync('../GitParsedContent/contents_bigquery-format.json', JSON.stringify(globalContents[key]) + os.EOL);
+        });
+
 
       });
 

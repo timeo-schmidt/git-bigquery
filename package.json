@@ -1,0 +1,23 @@
+{
+  "name": "bigquery-git",
+  "version": "1.0.0",
+  "description": "Node Client to upload local Git Repositories into Google BigQuery DataSet",
+  "main": "get_git_files.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timeo-schmidt/github-bigquery.git"
+  },
+  "author": "Timeo Schmidt",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timeo-schmidt/github-bigquery/issues"
+  },
+  "homepage": "https://github.com/timeo-schmidt/github-bigquery#readme",
+  "dependencies": {
+    "command-line-args": "^4.0.6",
+    "nodegit": "^0.18.3"
+  }
+}
