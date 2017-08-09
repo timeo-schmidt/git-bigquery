@@ -141,6 +141,7 @@ These Queries are copied from [This Medium Post from Francesc Campoy](https://me
 Thanks! 
 
 Timeo Schmidt
-<p>During my 2 weeks [@freiheit.com](http://www.freiheit.com)
-With the help of: [freiheit](https://github.com/freiheit-com)</p>
+<br>
+During my 2 weeks [@freiheit.com](http://www.freiheit.com)
+With the help of: [freiheit](https://github.com/freiheit-com)
 
