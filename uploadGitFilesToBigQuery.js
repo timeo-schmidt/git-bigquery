@@ -18,6 +18,7 @@ var dataset = bigquery.dataset('git');
 var commitTable = dataset.table('commits');
 var filesTable = dataset.table('files');
 var contentsTable = dataset.table('contents');
+var diffTable = dataset.table('diffs');
 
 function launchStreams() {
 
@@ -39,6 +40,24 @@ function launchStreams() {
       });
     });
 
+  console.log("[Good] Opening Diffs File");
+  console.log("[Good] Launching Write Stream for Diffs");
+  fs.createReadStream('../GitParsedContent/diffs_bigquery-format.json')
+    .pipe(diffTable.createWriteStream('json'))
+    .on('complete', function(job) {
+      job.on('error', function(err) {
+        console.log("ERROR: Diffs");
+        console.log(err);
+      });
+
+      job.on('complete', function(metadata) {
+        console.log(util.inspect(metadata, false, null));
+        console.log("=======================================");
+        console.log("[Awesome: Diffs] Uploaded Diffs to Database");
+        console.log("=======================================");
+      });
+    });
+
 
   console.log("[Good] Opening Files File");
   console.log("[Good] Launching Write Stream for Files");
@@ -46,7 +65,7 @@ function launchStreams() {
     .pipe(filesTable.createWriteStream('json'))
     .on('complete', function(job) {
       job.on('error', function(err) {
-        console.log("ERROR: Commits");
+        console.log("ERROR: Files");
         console.log(err);
       });
 
@@ -73,9 +92,6 @@ function launchStreams() {
         console.log(util.inspect(metadata, false, null));
         console.log("=======================================");
         console.log("[Awesome: Contents] Uploaded contents to Database");
-        console.log("=======================================");
-        console.log("=======================================");
-        console.log("!Have Fun Querying your Data!");
         console.log("=======================================");
       });
     });

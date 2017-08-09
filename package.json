@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/timeo-schmidt/github-bigquery#readme",
   "dependencies": {
+    "@google-cloud/bigquery": "^0.9.6",
     "command-line-args": "^4.0.6",
+    "lodash": "^4.17.4",
     "nodegit": "^0.18.3"
-  }
+  },
+  "devDependencies": {}
 }
