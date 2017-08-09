@@ -21,7 +21,7 @@ There are already public GitHub Datasets available on BigQuery and people have i
  - Node.js installed
  - Google BigQuery Account
 
-**Configuration**
+**Configuration(Important)**
 <br>
 Edit your configuration.json file and adapt it to your needs. Also, create the dataset "git" or use another dataset and adapt the configuration.json accordingly. 
 
