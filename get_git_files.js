@@ -4,7 +4,6 @@ INFO:
   -b argument must be a branch which is searched (TYPE: string (e.g. master))
   -p argument must lead to a valid git project path (TYPE: path (e.g. ../project/))
   -c argument is the path where the content of the git repo may get temporarily stored in (TYPE: path (e.g. ../contents/) )
-  -d argument may be used if upload is not required - Debugging Purposes (TYPE: Boolean (e.g. just leave it out if debugging is not required))
 
 
 node get_git_files.js -b master -p ../sql-api/ -c ../GitUploadRepo/
@@ -19,6 +18,8 @@ const commandLineArgs = require('command-line-args');
 var _ = require('lodash');
 var os = require('os');
 var fs = require('fs');
+
+const globalConfig = JSON.parse(fs.readFileSync('configuration.json'));
 
 
 //Passed Arguments via commandLineArgs
@@ -36,11 +37,6 @@ const optionDefinitions = [{
     name: 'content',
     alias: 'c',
     type: String
-  },
-  {
-    name: 'debug',
-    alias: 'd',
-    type: Boolean
   }
 ];
 
@@ -51,7 +47,7 @@ const options = commandLineArgs(optionDefinitions);
 var branch = options.branch;
 var repoDir = options.path;
 
-if (content undefined) {
+if (options.content === undefined) {
   var contentPath_link = require("path").resolve("../GitUploadRepo/");
 } else {
   var contentPath_link = require("path").resolve(options.content);
@@ -396,14 +392,14 @@ function getExisting() {
 
   const BigQuery = require('@google-cloud/bigquery');
 
-  const projectId = 'fdc-test-statistic';
+  const projectId = globalConfig.project_id;
 
   const bigquery = BigQuery({
     projectId: projectId
   });
 
   //git Sub Dataset
-  var dataset = bigquery.dataset('git');
+  var dataset = bigquery.dataset(globalConfig.dataset);
 
 
   var commitTable = dataset.table('commits');

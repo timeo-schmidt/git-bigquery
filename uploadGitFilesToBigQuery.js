@@ -4,14 +4,17 @@ const util = require('util');
 
 const BigQuery = require('@google-cloud/bigquery');
 
-const projectId = 'fdc-test-statistic';
+const globalConfig = JSON.parse(fs.readFileSync('configuration.json'));
+
+const projectId = globalConfig.project_id;
 
 const bigquery = BigQuery({
   projectId: projectId
 });
 
+
 //git Sub Dataset
-var dataset = bigquery.dataset('git');
+var dataset = bigquery.dataset(globalConfig.dataset);
 
 
 
