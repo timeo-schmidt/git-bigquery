@@ -7,7 +7,7 @@ INFO:
   -d argument may be used if upload is not required - Debugging Purposes (TYPE: Boolean (e.g. just leave it out if debugging is not required))
 
 
-node get_git_files.js -b master -p ../sql-api/
+node get_git_files.js -b master -p ../sql-api/ -c ../GitUploadRepo/
 
 */
 
@@ -50,7 +50,13 @@ const options = commandLineArgs(optionDefinitions);
 //CLI Inputs
 var branch = options.branch;
 var repoDir = options.path;
-var contentPath_link = require("path").resolve(options.content);
+
+if (content undefined) {
+  var contentPath_link = require("path").resolve("../GitUploadRepo/");
+} else {
+  var contentPath_link = require("path").resolve(options.content);
+}
+
 var debug = options.debug;
 
 

@@ -1,0 +1,5 @@
+{
+  "project-id": "your-project-id",
+  "dataset": "git",
+  "temporary-storage-path": "../GitParsedContent/"
+}
