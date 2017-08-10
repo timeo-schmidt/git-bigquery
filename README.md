@@ -127,7 +127,7 @@ As mentioned above, you can most likely use any query about the public GitHub da
     FROM [your-files]
     WHERE RIGHT(path, 3) = ‘.go’
 
-[**VIEW ALL QUERIES**](blba)
+[**VIEW ALL QUERIES**](https://github.com/freiheit-com/git-bigquery/blob/master/QUERIES.md)
 ------------------------
 *Have you written more interesting queries? - Create a Pull request and we would love to add them here.*
 
