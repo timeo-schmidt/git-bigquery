@@ -72,7 +72,7 @@ These Queries are copied from [This Medium Post from Francesc Campoy](https://me
 ------------
 
 **Get the most frequently changed files in a repository** <br>
-The results show the most frequent files which are found in all commits and shows the average number of affected lines of a file.
+The results show the most frequent files which are found in all commits and shows the average number of affected lines per commit.
 
     #SQL SYNTAX
     SELECT
