@@ -127,6 +127,8 @@ As mentioned above, you can most likely use any query about the public GitHub da
     FROM [your-files]
     WHERE RIGHT(path, 3) = ‘.go’
 
+[**VIEW ALL QUERIES**](blba)
+------------------------
 *Have you written more interesting queries? - Create a Pull request and we would love to add them here.*
 
 These Queries are copied from [This Medium Post from Francesc Campoy](https://medium.com/google-cloud/analyzing-go-code-with-bigquery-485c70c3b451) and from [This Gist by arfon](https://gist.github.com/arfon/49ca314a5b0a00b1ebf91167db3ff02c). Check these links out for more information. Also check out [This Post by Felipe Hoffa](https://medium.com/google-cloud/github-on-bigquery-analyze-all-the-code-b3576fd2b150) for more info.
