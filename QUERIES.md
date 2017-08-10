@@ -81,7 +81,7 @@ The results show the most frequent files which are found in all commits and show
       COUNT(*) AS commits,
       ROUND(AVG(d.changed_lines + d.added_lines + d.deleted_lines)) AS affected_lines
     FROM
-      `fdc-test-statistic.git.commits`,
+      `your-commits`,
       UNNEST(difference) AS d
     WHERE
       repo_name="sql-api"
