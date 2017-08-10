@@ -1,7 +1,12 @@
+**ALL QUERIES OVERVIEW**
+--------------------
+
+<br>
+
 **Find How many Times "This Should Never Happen" was in your code**
 
   
-
+      #LEGACY SQL SYNTAX
       SELECT count(*)
     FROM (SELECT id, repo_name, path
             FROM [your-files]
@@ -14,6 +19,7 @@
 
 **Most Commonly Used Go Packages**
 
+    #LEGACY SQL SYNTAX
     SELECT
       REGEXP_EXTRACT(line, r'"([^"]+)"') AS url,
       COUNT(*) AS count
@@ -33,6 +39,7 @@
 
 **Most Commonly Used Java Packages**
 
+    #LEGACY SQL SYNTAX
     SELECT package, COUNT(*) c
     FROM (
       SELECT REGEXP_EXTRACT(line, r' ([a-z0-9\._]*)\.') package, id
@@ -51,6 +58,7 @@
 
 **Counting .go Files (Adjust for any other extension)**
 
+    #LEGACY SQL SYNTAX
     SELECT COUNT(*)
     FROM [your-files]
     WHERE RIGHT(path, 3) = ‘.go’
@@ -63,9 +71,10 @@ These Queries are copied from [This Medium Post from Francesc Campoy](https://me
 **MORE QUERIES**
 ------------
 
-**Get the most frequently changed files in a repository**
+**Get the most frequently changed files in a repository** <br>
 The results show the most frequent files which are found in all commits and shows the average number of affected lines of a file.
 
+    #SQL SYNTAX
     SELECT
       d.new_path,
       repo_name,
