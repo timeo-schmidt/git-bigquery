@@ -1,6 +1,6 @@
 **ALL QUERIES OVERVIEW**
 --------------------
-
+*Note that there are 2 Query Syntaxes for BigQuery. Standard SQL and Legacy SQL. If you are developing new Queries, standard SQL Syntax is preferred. You can change the Syntax Mode of Queries under >Show Options< and then untick Legacy SQL*
 <br>
 
 **Find How many Times "This Should Never Happen" was in your code**
