@@ -1,5 +1,5 @@
 {
-  "project_id": "your-project-id",
+  "project_id": "fdc-test-statistic",
   "dataset": "git",
   "temporary_storage_path": "../GitParsedContent/"
 }

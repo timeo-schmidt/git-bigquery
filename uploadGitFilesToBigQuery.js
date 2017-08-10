@@ -22,6 +22,7 @@ var commitTable = dataset.table('commits');
 var filesTable = dataset.table('files');
 var contentsTable = dataset.table('contents');
 var diffTable = dataset.table('diffs');
+var refTable = dataset.table('refs');
 
 function launchStreams() {
 
@@ -95,6 +96,25 @@ function launchStreams() {
         console.log(util.inspect(metadata, false, null));
         console.log("=======================================");
         console.log("[Awesome: Contents] Uploaded contents to Database");
+        console.log("=======================================");
+      });
+    });
+
+
+  console.log("[Good] Opening Refs File");
+  console.log("[Good] Launching Write Stream for Refs");
+  fs.createReadStream('../GitParsedContent/refs_bigquery-format.json')
+    .pipe(refTable.createWriteStream('json'))
+    .on('complete', function(job) {
+      job.on('error', function(err) {
+        console.log("ERROR: Refs");
+        console.log(err);
+      });
+
+      job.on('complete', function(metadata) {
+        console.log(util.inspect(metadata, false, null));
+        console.log("=======================================");
+        console.log("[Awesome: Refs] Uploaded Refs to Database");
         console.log("=======================================");
       });
     });

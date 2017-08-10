@@ -3,11 +3,12 @@
 INFO:
   -b argument must be a branch which is searched (TYPE: string (e.g. master))
   -p argument must lead to a valid git project path (TYPE: path (e.g. ../project/))
-  -c argument is the path where the content of the git repo may get temporarily stored in (TYPE: path (e.g. ../contents/) )
+  -s argument is the path where the content of the git repo may get temporarily stored in (TYPE: path (e.g. ../contents/) )
 
 
-node get_git_files.js -b master -p ../sql-api/ -c ../GitUploadRepo/
+node get_git_files.js -b master -p ../sql-api/  -c ../GitUploadRepo/
 
+                                              ^^^optional parameter -c ^^^
 */
 
 
@@ -18,8 +19,6 @@ const commandLineArgs = require('command-line-args');
 var _ = require('lodash');
 var os = require('os');
 var fs = require('fs');
-
-const globalConfig = JSON.parse(fs.readFileSync('configuration.json'));
 
 
 //Passed Arguments via commandLineArgs
@@ -34,7 +33,12 @@ const optionDefinitions = [{
     type: String
   },
   {
-    name: 'content',
+    name: 'store',
+    alias: 's',
+    type: String
+  },
+  {
+    name: 'config',
     alias: 'c',
     type: String
   }
@@ -44,16 +48,15 @@ const options = commandLineArgs(optionDefinitions);
 
 
 //CLI Inputs
-var branch = options.branch;
-var repoDir = options.path;
+const branch = options.branch;
+const repoDir = options.path;
 
-if (options.content === undefined) {
-  var contentPath_link = require("path").resolve("../GitUploadRepo/");
+
+if (options.store === undefined) {
+  var contentPath_link = require("path").resolve("../GitParsedContent/");
 } else {
-  var contentPath_link = require("path").resolve(options.content);
+  var contentPath_link = require("path").resolve(options.store);
 }
-
-var debug = options.debug;
 
 
 //Check if Branch input is available
@@ -74,6 +77,16 @@ if (contentPath_link == undefined) {
   console.error("[INFO] Expecting path to folder where Content gets stored in.");
   process.exit(1);
 }
+if (configFile == undefined) {
+  const configPath = 'configuration.json';
+}
+else {
+  const configPath = options.config;
+}
+
+//Load Config File
+const globalConfig = JSON.parse(fs.readFileSync(configPath));
+
 
 //Resolve Branch Input Path to Absolute Path
 var pathToRepo = require("path").resolve(repoDir);
@@ -82,10 +95,11 @@ var pathToRepo = require("path").resolve(repoDir);
 var repoName = pathToRepo.substr(pathToRepo.lastIndexOf("/") + 1, pathToRepo.length);
 
 console.log("contentPATH: " + contentPath_link);
-fs.writeFileSync(contentPath_link + 'commits_bigquery-format.json', '');
-fs.writeFileSync(contentPath_link + 'diffs_bigquery-format.json', '');
-fs.writeFileSync(contentPath_link + 'files_bigquery-format.json', '');
-fs.writeFileSync(contentPath_link + 'contents_bigquery-format.json', '');
+fs.writeFileSync(contentPath_link + '/commits_bigquery-format.json', '');
+fs.writeFileSync(contentPath_link + '/diffs_bigquery-format.json', '');
+fs.writeFileSync(contentPath_link + '/files_bigquery-format.json', '');
+fs.writeFileSync(contentPath_link + '/contents_bigquery-format.json', '');
+fs.writeFileSync(contentPath_link + '/refs_bigquery-format.json', '');
 
 //Global Variables
 //Existing Hashes of (Commits/Diffs) and of (Files/Contents) are stored here, in  order to avoid duplicates
@@ -165,6 +179,27 @@ function buildCommitObject(commit, commit_diff) {
 function stream_git_data(streamConfig) {
   Git.Repository.open(pathToRepo).then(function(repo) {
       console.log("[GOOD] The Repository was Opened successfully.");
+
+      function writeRef() {
+        //Get the Branch Hash at the current moment
+        repo.head().then(function(reference) {
+            const headName = String(reference.name());
+            const headOID = String(reference.target());
+            const currenTime = Math.round(new Date().getTime()/1000);
+
+            console.log("bla")
+            const headObject = {
+              "ref": headOID,
+              "name": headName,
+              "time_sec": currenTime,
+              "repo_name": repoName
+            }
+
+            fs.writeFileSync(contentPath_link + '/refs_bigquery-format.json', JSON.stringify(headObject));
+        });
+      }
+
+      writeRef();
 
       //Working with first Commit Object of specified Branch
 
@@ -427,3 +462,7 @@ function getExisting() {
 }
 
 getExisting();
+
+function writeBranchInfo() {
+
+}
